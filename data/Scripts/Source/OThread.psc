@@ -217,6 +217,78 @@ Actor Function GetActor(int ThreadID, int Index) Global Native
 */;
 int Function GetActorPosition(int ThreadID, Actor Act) Global Native
 
+;/* SwapActors
+* * swaps the two actors at the given positions in the thread
+* * respects sex and actor condition constraints unless unrestricted navigation is enabled
+* * may change the current scene if the swapped actors don't fit the current animation
+* *
+* * @param: ThreadID, the id of the thread
+* * @param: PositionA, the position of the first actor
+* * @param: PositionB, the position of the second actor
+* *
+* * @return: true if the swap was successful, false if the swap is not possible
+*/;
+bool Function SwapActors(int ThreadID, int PositionA, int PositionB) Global Native
+
+;/* GetSwapPartners
+* * returns the positions of actors that can be swapped with the given actor
+* * respects sex and actor condition constraints unless unrestricted navigation is enabled
+* *
+* * @param: ThreadID, the id of the thread
+* * @param: Act, the actor to get valid swap partners for
+* *
+* * @return: an array of position indices that can swap with the given actor
+*/;
+int[] Function GetSwapPartners(int ThreadID, Actor Act) Global Native
+
+;/* SwapActorsWithUI
+* * opens a UI dialog to allow the player to swap actors in the thread
+* * first selects which actor to swap, then shows valid swap partners for that actor
+* *
+* * @param: ThreadID, the id of the thread
+*/;
+Function SwapActorsWithUI(int ThreadID) Global Native
+
+;/* AddActorToThread
+* * adds a new actor to the thread
+* * automatically finds a compatible animation for the new actor count
+* * respects actor sorting rules (dominant/schlong first, player position)
+* *
+* * @param: ThreadID, the id of the thread
+* * @param: Act, the actor to add to the thread
+* *
+* * @return: true if the actor was successfully added, false if adding is not possible
+*/;
+bool Function AddActorToThread(int ThreadID, Actor Act) Global Native
+
+;/* AddActorWithUI
+* * opens a UI dialog to allow the player to select an actor to add to the thread
+* * shows nearby actors that can be validly added
+* *
+* * @param: ThreadID, the id of the thread
+*/;
+Function AddActorWithUI(int ThreadID) Global Native
+
+;/* RemoveActorFromThread
+* * removes an actor from the thread at the given position
+* * automatically finds a compatible animation for the new actor count
+* * reindexes remaining actors
+* *
+* * @param: ThreadID, the id of the thread
+* * @param: Position, the position index of the actor to remove
+* *
+* * @return: true if the actor was successfully removed, false if removal is not possible
+*/;
+bool Function RemoveActorFromThread(int ThreadID, int Position) Global Native
+
+;/* RemoveActorWithUI
+* * opens a UI dialog to allow the player to select an actor to remove from the thread
+* * shows all actors currently in the thread
+* *
+* * @param: ThreadID, the id of the thread
+*/;
+Function RemoveActorWithUI(int ThreadID) Global Native
+
 
 ;  ██████╗██╗     ██╗███╗   ███╗ █████╗ ██╗  ██╗
 ; ██╔════╝██║     ██║████╗ ████║██╔══██╗╚██╗██╔╝

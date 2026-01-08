@@ -54,6 +54,8 @@ set(sources
     src/Core/EquipObjectHandler.cpp
     src/Core/ExpressionUpdater.cpp
     src/Core/Singleton.h
+    src/Core/Thread/ThreadActorManagement.cpp
+    src/Core/Thread/ThreadActorSwap.cpp
     src/Core/Thread/ThreadAutoControl.cpp
     src/Core/Thread/ThreadClimax.cpp
     src/Core/Thread/ThreadFurniture.cpp

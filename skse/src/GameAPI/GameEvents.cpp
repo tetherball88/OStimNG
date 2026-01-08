@@ -35,7 +35,7 @@ namespace GameAPI {
             GameUtil::sendModEvent(GameLogic::GameTable::getMainQuest(), "ostim_thread_speedchanged", std::to_string(speed), threadID);
         }
 
-        void sendEndEvent(int threadID, Threading::Thread* thread, std::vector<GameActor> actors) {
+        void sendEndEvent(int threadID, Threading::Thread* thread, std::vector<GameActor> actors, const std::string& originator) {
             json json = json::object();
             json["scene"] = thread ? thread->getCurrentNode()->getNodeID() : "";
             json["actors"] = json::array();
@@ -48,6 +48,7 @@ namespace GameAPI {
                     json["metadata"].push_back(metadata);
                 }
             }
+            json["originator"] = originator.empty() ? "normal" : originator;
 
             std::string jsonString = json.dump();
 
@@ -71,6 +72,31 @@ namespace GameAPI {
 
         void sendFurnitureChangedEvent(int threadID, GameAPI::GameObject furniture) {
             GameUtil::sendModEvent(furniture.form, "ostim_furniturechanged", Furniture::FurnitureTable::getFurnitureType(furniture, false)->id, threadID);
+        }
+
+        void sendActorsSwappedEvent(int threadID, int positionA, int positionB) {
+            json json = json::object();
+            json["positionA"] = positionA;
+            json["positionB"] = positionB;
+            std::string jsonString = json.dump();
+
+            GameUtil::sendModEvent(GameLogic::GameTable::getMainQuest(), "ostim_actors_swapped", jsonString, threadID);
+        }
+
+        void sendActorAddedEvent(int threadID, GameAPI::GameActor actor, int position) {
+            json json = json::object();
+            json["position"] = position;
+            std::string jsonString = json.dump();
+
+            GameUtil::sendModEvent(actor.form, "ostim_actor_join", jsonString, threadID);
+        }
+
+        void sendActorRemovedEvent(int threadID, GameAPI::GameActor actor, int position) {
+            json json = json::object();
+            json["position"] = position;
+            std::string jsonString = json.dump();
+
+            GameUtil::sendModEvent(actor.form, "ostim_actor_leave", jsonString, threadID);
         }
 
         void sendOStimEvent(int threadID, std::string type, Graph::RoleMap<GameActor> actors) {

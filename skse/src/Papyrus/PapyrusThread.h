@@ -211,6 +211,34 @@ namespace PapyrusThread {
         ScriptAPI::Thread::changeFurniture(threadID, furniture, sceneID);
     }
 
+    bool SwapActors(RE::StaticFunctionTag*, int threadID, int positionA, int positionB) {
+        return ScriptAPI::Thread::swapActors(threadID, positionA, positionB);
+    }
+
+    std::vector<int> GetSwapPartners(RE::StaticFunctionTag*, int threadID, RE::Actor* actor) {
+        return ScriptAPI::Thread::getSwapPartners(threadID, actor);
+    }
+
+    void SwapActorsWithUI(RE::StaticFunctionTag*, int threadID) {
+        ScriptAPI::Thread::swapActorsWithUI(threadID);
+    }
+
+    bool AddActorToThread(RE::StaticFunctionTag*, int threadID, RE::Actor* actor) {
+        return ScriptAPI::Thread::addActorToThread(threadID, actor);
+    }
+
+    void AddActorWithUI(RE::StaticFunctionTag*, int threadID) {
+        ScriptAPI::Thread::addActorWithUI(threadID);
+    }
+
+    bool RemoveActorFromThread(RE::StaticFunctionTag*, int threadID, int position) {
+        return ScriptAPI::Thread::removeActorFromThread(threadID, position);
+    }
+
+    void RemoveActorWithUI(RE::StaticFunctionTag*, int threadID) {
+        ScriptAPI::Thread::removeActorWithUI(threadID);
+    }
+
 
     bool IsInAutoMode(RE::StaticFunctionTag*, int threadID) {
         Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
@@ -323,6 +351,13 @@ namespace PapyrusThread {
         BIND(GetFurniture);
         BIND(GetFurnitureType);
         BIND(ChangeFurniture);
+        BIND(SwapActors);
+        BIND(GetSwapPartners);
+        BIND(SwapActorsWithUI);
+        BIND(AddActorToThread);
+        BIND(AddActorWithUI);
+        BIND(RemoveActorFromThread);
+        BIND(RemoveActorWithUI);
 
         BIND(IsInAutoMode);
         BIND(StartAutoMode);

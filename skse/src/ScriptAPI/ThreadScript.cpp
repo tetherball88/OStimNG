@@ -20,6 +20,60 @@ namespace ScriptAPI {
         }
 
 
+        bool swapActors(int threadID, int positionA, int positionB) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread) {
+                return thread->swapActors(positionA, positionB);
+            }
+            return false;
+        }
+
+        void swapActorsWithUI(int threadID) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread) {
+                thread->swapActorsWithUI();
+            }
+        }
+
+        std::vector<int> getSwapPartners(int threadID, GameAPI::GameActor actor) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread) {
+                return thread->getSwapPartners(actor);
+            }
+            return {};
+        }
+
+
+        bool addActorToThread(int threadID, GameAPI::GameActor actor) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread && actor.form) {
+                return thread->addActorToThread(actor.form);
+            }
+            return false;
+        }
+
+        void addActorWithUI(int threadID) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread) {
+                thread->addActorWithUI();
+            }
+        }
+
+        bool removeActorFromThread(int threadID, int position) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread) {
+                return thread->removeActorFromThread(position);
+            }
+            return false;
+        }
+
+        void removeActorWithUI(int threadID) {
+            Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
+            if (thread) {
+                thread->removeActorWithUI();
+            }
+        }
+
 
         bool hasMetadata(int threadID, std::string metadata) {
             Threading::Thread* thread = Threading::ThreadManager::GetSingleton()->GetThread(threadID);
