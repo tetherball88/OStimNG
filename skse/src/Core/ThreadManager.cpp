@@ -43,6 +43,10 @@ namespace Threading {
 
     int ThreadManager::startThread(ThreadStartParams params) {
         std::unique_lock<std::shared_mutex> lock(m_threadMapMtx);
+        return startThreadNoLock(params);
+    }
+
+    int ThreadManager::startThreadNoLock(ThreadStartParams params) {
         int threadID = -1;
         for (GameAPI::GameActor actor : params.actors) {
             if (actor.isPlayer()) {
@@ -68,10 +72,31 @@ namespace Threading {
         thread->registerThreadEndListener([this, thread]() { EventUtil::invokeListeners(threadEndListeners, thread); });
 
         thread->initContinue(params);
-        
+
         EventUtil::invokeListeners(threadStartListeners, thread);
 
         return threadID;
+    }
+
+    int ThreadManager::restartThread(ThreadId oldThreadId, ThreadStartParams params) {
+        std::unique_lock<std::shared_mutex> lock(m_threadMapMtx);
+
+        auto oldIt = m_threadMap.find(oldThreadId);
+        if (oldIt == m_threadMap.end()) {
+            logger::warn("restartThread: old thread {} not found", oldThreadId);
+            return -1;
+        }
+
+        // Stop old thread - only free actors not continuing to new thread
+        Thread* oldThread = oldIt->second;
+        UI::UIState::GetSingleton()->HandleThreadRemoved(oldThread);
+        m_threadMap.erase(oldThreadId);
+        oldThread->closeForRestart(params.actors);
+        delete oldThread;
+        if (oldThreadId != 0) {
+            idGenerator.free(oldThreadId);
+        }
+        return startThreadNoLock(params);
     }
 
     Thread* ThreadManager::GetThread(ThreadId a_id) {

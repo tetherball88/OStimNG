@@ -63,6 +63,11 @@ namespace UI::Scene {
 	}
 
 	void SceneOptions::BuildPageTree() {
+		// Clear old cached data before rebuilding - critical for thread restart
+		// to avoid dangling pointers to deleted thread's actor data
+		rootPages.clear();
+		selectedPage = nullptr;
+
 		auto& rootSubnodes = Graph::GraphTable::getRootOptionsNode().subNodes;
 		BuildSubPages(nullptr, rootPages, rootSubnodes);
 	}

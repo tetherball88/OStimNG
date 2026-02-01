@@ -676,6 +676,30 @@ namespace Threading {
         GameAPI::GameEvents::sendEndEvent(m_threadId, this, getGameActors());
     }
 
+    void Thread::closeForRestart(const std::vector<GameAPI::GameActor>& continuingActors) {
+        logger::info("closing thread {} for restart", m_threadId);
+
+        // Skip UI/camera/settings restoration - new thread will set these up
+        // Skip furniture cleanup - furniture continues to new thread
+
+        // Free only actors NOT continuing to the new thread (e.g., removed actor)
+        for (auto& actorIt : m_actors) {
+            GameAPI::GameActor actor = actorIt.second.getActor();
+            bool isContinuing = std::find_if(continuingActors.begin(), continuingActors.end(),
+                [&](const GameAPI::GameActor& a) { return a.form == actor.form; }) != continuingActors.end();
+
+            if (!isContinuing) {
+                logger::info("freeing removed actor: {}", actor.getName());
+                actorIt.second.free(true);  // Force immediate sync redress on thread restart
+            }
+        }
+
+        logger::info("closed thread {} for restart", m_threadId);
+
+        EventUtil::invokeListeners(threadEndListeners);
+        GameAPI::GameEvents::sendEndEvent(m_threadId, this, getGameActors());
+    }
+
     void Thread::addActorSink(RE::Actor* a_actor) {
         RE::BSAnimationGraphManagerPtr graphManager;
         a_actor->GetAnimationGraphManager(graphManager);

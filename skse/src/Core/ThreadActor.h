@@ -53,7 +53,7 @@ namespace Threading {
 
         void loop();
 
-        void free();
+        void free(bool forceImmediateRedress = false);
 
         inline bool isFemale() { return female; }
         inline bool hasSchlong() { return schlong; }

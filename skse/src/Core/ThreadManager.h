@@ -14,6 +14,7 @@ namespace Threading {
     public:
         ThreadManager();
         int startThread(ThreadStartParams params);
+        int restartThread(ThreadId oldThreadId, ThreadStartParams params);
         Thread* GetThread(ThreadId a_id);
         Thread* getPlayerThread();
         void queueThreadStop(ThreadId threadID);
@@ -40,6 +41,7 @@ namespace Threading {
         std::vector<ThreadId> threadStopQueue;
 
         void stopThreadNoLock(ThreadId threadID);
+        int startThreadNoLock(ThreadStartParams params);
 
 #pragma region events
     public:

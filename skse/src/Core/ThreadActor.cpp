@@ -414,7 +414,7 @@ namespace Threading {
     }
 
 
-    void ThreadActor::free() {
+    void ThreadActor::free(bool forceImmediateRedress) {
         logger::info("freeing actor {}-{}: {}", thread->m_threadId, index, actor.getName());
 
         if (this->graphActor) {
@@ -428,39 +428,54 @@ namespace Threading {
             object.removeItems(actor);
         }
 
-        // TODO properly use GameActor
-        if (MCM::MCMTable::animateRedress() && !isPlayer) {
-            const auto skyrimVM = RE::SkyrimVM::GetSingleton();
-            auto vm = skyrimVM ? skyrimVM->impl : nullptr;
-            if (vm) {
-                RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> callback;
-                std::vector<RE::TESForm*> weapons = {weaponry.rightHand, weaponry.leftHand, weaponry.ammo};
-                std::vector<RE::TESObjectARMO*> armors;
+        // Force immediate sync redress if requested (for thread restarts)
+        if (forceImmediateRedress) {
+            // Immediate native redress - no animation, no papyrus
+            if (!undressedMask.isEmpty()) {
                 for (GameAPI::GameArmor item : undressedItems) {
-                    armors.push_back(item.form);
+                    actor.equip(item);
                 }
-                auto args = RE::MakeFunctionArguments(std::move(actor.form), std::move(female), std::move(armors), std::move(weapons));
-                vm->DispatchStaticCall("OUndress", "AnimateRedress", args, callback);
+                undressedItems.clear();
+                undressedMask.clear();
+                undressed = false;
             }
+            addWeapons();
         } else {
-            if (Util::Globals::usePapyrusUndressing()) {
-                // this object will be destroyed before papyrus redressing is done
-                // so for this case we need to invoke Redress without a callback here
+            // Original behavior: animated or papyrus redressing
+            // TODO properly use GameActor
+            if (MCM::MCMTable::animateRedress() && !isPlayer) {
                 const auto skyrimVM = RE::SkyrimVM::GetSingleton();
                 auto vm = skyrimVM ? skyrimVM->impl : nullptr;
                 if (vm) {
+                    RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> callback;
+                    std::vector<RE::TESForm*> weapons = {weaponry.rightHand, weaponry.leftHand, weaponry.ammo};
                     std::vector<RE::TESObjectARMO*> armors;
                     for (GameAPI::GameArmor item : undressedItems) {
                         armors.push_back(item.form);
                     }
-                    RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> callback;
-                    auto args = RE::MakeFunctionArguments(std::move(thread->m_threadId), std::move(actor.form), std::move(armors));
-                    vm->DispatchStaticCall("OUndress", "Redress", args, callback);
+                    auto args = RE::MakeFunctionArguments(std::move(actor.form), std::move(female), std::move(armors), std::move(weapons));
+                    vm->DispatchStaticCall("OUndress", "AnimateRedress", args, callback);
                 }
             } else {
-                redress();
+                if (Util::Globals::usePapyrusUndressing()) {
+                    // this object will be destroyed before papyrus redressing is done
+                    // so for this case we need to invoke Redress without a callback here
+                    const auto skyrimVM = RE::SkyrimVM::GetSingleton();
+                    auto vm = skyrimVM ? skyrimVM->impl : nullptr;
+                    if (vm) {
+                        std::vector<RE::TESObjectARMO*> armors;
+                        for (GameAPI::GameArmor item : undressedItems) {
+                            armors.push_back(item.form);
+                        }
+                        RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> callback;
+                        auto args = RE::MakeFunctionArguments(std::move(thread->m_threadId), std::move(actor.form), std::move(armors));
+                        vm->DispatchStaticCall("OUndress", "Redress", args, callback);
+                    }
+                } else {
+                    redress();
+                }
+                addWeapons();
             }
-            addWeapons();
         }
 
         applyHeelOffset(false);
